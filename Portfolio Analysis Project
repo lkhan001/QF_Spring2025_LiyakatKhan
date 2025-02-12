@@ -1,1 +1,31 @@
+# Define the 7 NYSE-traded assets
+tickers = ["AAPL", "MSFT", "NVDA", "TSLA", "JPM", "AMZN", "GOOGL"]
+benchmark_tickers = ["SPY", "IWM", "DIA"]  # Benchmark ETFs
 
+# Fetch historical stock data (past 10 years)
+start_date = "2015-02-12"  # Adjusted for a full 10-year range
+end_date = "2025-02-12"
+
+# Download data from Yahoo Finance
+data = yf.download(tickers + benchmark_tickers, start=start_date, end=end_date, progress=False)["Adj Close"]
+
+# Calculate daily returns
+returns = data.pct_change().dropna()
+
+# Portfolio weights (equal weighting)
+portfolio_weight = round(1 / len(tickers), 4)
+
+# Initialize results dictionary
+results = {"Ticker": [], "Portfolio Weight": [], "Annualized Volatility": [], "Beta (SPY)": [],
+           "Beta (IWM)": [], "Beta (DIA)": [], "Avg Weekly Drawdown": [], "Max Weekly Drawdown": [],
+           "Total Return (10Y)": [], "Annualized Total Return (10Y)": []}
+
+# Compute factors for each stock
+for ticker in tickers:
+    stock_returns = returns[ticker]
+
+    # Annualized Volatility (3-months trailing)
+    volatility = stock_returns[-63:].std() * np.sqrt(252)
+
+    # Beta calculation (against SPY, IWM, DIA)
+    beta_spy = np.cov(stock_returns, returns["SPY"]
